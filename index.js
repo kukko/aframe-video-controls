@@ -251,7 +251,7 @@ AFRAME.registerComponent('video-controls', {
 
     this.el.sceneEl.addEventListener("loaded", function(){
 
-      let position = self.el.getAttribute('position');
+      var position = self.el.getAttribute('position');
       if (!position.x && !position.y && !position.z){
           self.position_control_from_camera();
       }
