@@ -42,7 +42,7 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	if (typeof AFRAME === 'undefined') {
 	  throw new Error('Component attempted to register before AFRAME was available.');
@@ -63,11 +63,13 @@
 	    backgroundColor: { default: 'black'},
 	    barColor: { default: 'red'},
 	    textColor: { default: 'yellow'},
-	    infoTextBottom: { default: DEFAULT_INFO_TEXT_BOTTOM},
-	    infoTextTop: { default: DEFAULT_INFO_TEXT_TOP},
+	    infoTextBottom: { default: undefined},
+	    infoTextTop: { default: undefined},
 	    infoTextFont: { default: '35px Helvetica Neue'},
 	    statusTextFont: { default: '30px Helvetica Neue'},
-	    timeTextFont: { default: '70px Helvetica Neue'}
+	    timeTextFont: { default: '70px Helvetica Neue'},
+	    showLoadingPercentageWhenLoaded: { default: true },
+	    position: { default: undefined }
 	  },
 
 	  position_time_from_steps: function(){
@@ -117,6 +119,12 @@
 	   * Called once when component is attached. Generally for initial setup.
 	   */
 	  init: function () {
+	      if (this.data.infoTextBottom === undefined){
+	          this.data.infoTextBottom = DEFAULT_INFO_TEXT_BOTTOM
+	      }
+	      if (this.data.infoTextTop === undefined){
+	          this.data.infoTextTop = DEFAULT_INFO_TEXT_TOP
+	      }
 
 	    var self = this;
 
@@ -183,7 +191,7 @@
 
 	    // On icon image, change video state and icon (play/pause)
 
-	    this.play_image.addEventListener('click', function (event) {
+	    this.play_image.addEventListener(this.el.getAttribute('play-pause-event') || 'click', function (event) {
 
 	        if(!self.video_el.paused){
 	            this.setAttribute("src", self.play_image_src);
@@ -289,7 +297,10 @@
 
 	    this.el.sceneEl.addEventListener("loaded", function(){
 
-	        self.position_control_from_camera();
+	      var position = self.el.getAttribute('position');
+	      if (!position.x && !position.y && !position.z){
+	          self.position_control_from_camera();
+	      }
 
 	        this.addEventListener("dblclick", function(){
 
@@ -439,7 +450,9 @@
 	                    ctx.fillStyle = this.data.textColor;
 	                    ctx.textAlign = "end";
 
-	                    ctx.fillText(percent.toFixed(0) + "% loaded", this.bar_canvas.width * 0.95, this.bar_canvas.height * 0.60);
+	                    if (this.data.showLoadingPercentageWhenLoaded || percent < 100){
+	                      ctx.fillText(percent.toFixed(0) + "% loaded", this.bar_canvas.width * 0.95, this.bar_canvas.height * 0.60);
+	                    }
 	                }
 
 
@@ -448,8 +461,13 @@
 	                ctx.fillStyle = this.data.textColor;
 	                ctx.font = this.data.infoTextFont;
 	                ctx.textAlign = "center";
-	                ctx.fillText(this.data.infoTextTop, this.bar_canvas.width/2, this.bar_canvas.height* 0.8);
-	                ctx.fillText(this.data.infoTextBottom, this.bar_canvas.width/2, this.bar_canvas.height* 0.95);
+	                if (this.data.infoTextTop !== 'null'){
+	                  ctx.fillText(this.data.infoTextTop, this.bar_canvas.width/2, this.bar_canvas.height* 0.8);
+	              }
+	              if (this.data.infoTextBottom !== 'null'){
+	                  ctx.fillText(this.data.infoTextBottom, this.bar_canvas.width/2, this.bar_canvas.height* 0.95);
+
+	              }
 
 	                // Show buffered ranges 'bins'
 
@@ -512,5 +530,5 @@
 	});
 
 
-/***/ }
+/***/ })
 /******/ ]);

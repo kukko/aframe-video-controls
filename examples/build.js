@@ -1,11 +1,11 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-!function(t){function e(a){if(i[a])return i[a].exports;var s=i[a]={exports:{},id:a,loaded:!1};return t[a].call(s.exports,s,s.exports,e),s.loaded=!0,s.exports}var i={};return e.m=t,e.c=i,e.p="",e(0)}([function(t,e){if("undefined"==typeof AFRAME)throw new Error("Component attempted to register before AFRAME was available.");var i="Double-click outside player to hide or show it.",a="Look+click on play or bar. Space bar and arrows also work.";AFRAME.registerComponent("video-controls",{schema:{src:{type:"string"},size:{type:"number","default":1},distance:{type:"number","default":2},backgroundColor:{"default":"black"},barColor:{"default":"red"},textColor:{"default":"yellow"},infoTextBottom:{"default":i},infoTextTop:{"default":a},infoTextFont:{"default":"35px Helvetica Neue"},statusTextFont:{"default":"30px Helvetica Neue"},timeTextFont:{"default":"70px Helvetica Neue"}},position_time_from_steps:function(){var t=this.current_step/this.bar_steps;this.video_el.readyState>0&&(this.video_el.currentTime=t*this.video_el.duration)},position_control_from_camera:function(){var t=this,e=t.el.sceneEl.camera;if(e){var i=e.el.getAttribute("rotation"),a=i.y;t.y_position=e.position.y+1.6,t.x_position=-t.data.distance*Math.sin(a*Math.PI/180),t.z_position=-t.data.distance*Math.cos(a*Math.PI/180),t.el.setAttribute("position",[t.x_position,t.y_position,t.z_position].join(" ")),this.el.object3D.lookAt(new THREE.Vector3(e.position.x,e.position.y+1.6,e.position.z))}},init:function(){var t=this;this.bar_steps=10,this.current_step=0,this.el.setAttribute("visible",!0),this.video_selector=this.data.src,this.video_el=document.querySelector(this.video_selector),t.play_image_src=document.getElementById("video-play-image")?"#video-play-image":"https://res.cloudinary.com/dxbh0pppv/image/upload/c_scale,h_512,q_10/v1471016296/play_wvmogo.png",t.pause_image_src=document.getElementById("video-pause-image")?"#video-pause-image":"https://res.cloudinary.com/dxbh0pppv/image/upload/c_scale,h_512,q_25/v1471016296/pause_ndega5.png",this.play_image=document.createElement("a-image"),this.video_el.paused?this.play_image.setAttribute("src",t.play_image_src):this.play_image.setAttribute("src",t.pause_image_src),this.video_el.addEventListener("ended",function(){t.play_image.setAttribute("src",t.play_image_src)}),this.video_el.addEventListener("pause",function(){t.play_image.setAttribute("src",t.play_image_src)}),this.video_el.addEventListener("playing",function(){t.play_image.setAttribute("src",t.pause_image_src)}),this.bar_canvas=document.createElement("canvas"),this.bar_canvas.setAttribute("id","video_player_canvas"),this.bar_canvas.width=1024,this.bar_canvas.height=256,this.bar_canvas.style.display="none",this.context=this.bar_canvas.getContext("2d"),this.texture=new THREE.Texture(this.bar_canvas),this.play_image.addEventListener("click",function(e){t.video_el.paused?(this.setAttribute("src",t.pause_image_src),t.video_el.play()):(this.setAttribute("src",t.play_image_src),t.video_el.pause()),e.stopPropagation(),e.preventDefault()}),window.addEventListener("keyup",function(e){switch(e.keyCode){case 32:t.play_image.dispatchEvent(new Event("click"));break;case 37:t.current_step=0,t.position_time_from_steps();break;case 39:t.current_step=t.bar_steps,t.position_time_from_steps();break;case 38:t.current_step=t.current_step<t.bar_steps?t.current_step+1:t.current_step,t.position_time_from_steps();break;case 40:t.current_step=t.current_step>0?t.current_step-1:t.current_step,t.position_time_from_steps()}},!1),this.bar=document.createElement("a-plane"),this.bar.setAttribute("color","#000"),this.bar.addEventListener("click",function(e){var i=document.querySelector("a-cursor").components.raycaster.raycaster.intersectObject(this.object3D,!0)[0].point,a=this.object3D.worldToLocal(i).x,s=a/t.data.size+.5;t.current_step=Math.round(s*t.bar_steps),t.video_el.readyState>0&&(t.video_el.currentTime=s*t.video_el.duration),e.stopPropagation(),e.preventDefault()}),this.el.appendChild(this.bar_canvas),this.el.appendChild(this.play_image),this.el.appendChild(this.bar),this.el.sceneEl.addEventListener("loaded",function(){t.position_control_from_camera(),this.addEventListener("dblclick",function(){var e=document.querySelector("a-cursor").components.raycaster.raycaster;0==e.intersectObject(t.el.object3D,!0).length&&(t.el.getAttribute("visible")?t.el.setAttribute("visible",!1):(t.el.setAttribute("visible",!0),t.position_control_from_camera()))})})},update:function(t){this.position_control_from_camera(),this.bar.setAttribute("height",this.data.size/4),this.bar.setAttribute("width",this.data.size),this.bar.setAttribute("position","0.0 0.0 0"),this.play_image.setAttribute("height",this.data.size/4),this.play_image.setAttribute("width",this.data.size/4),this.play_image.setAttribute("position",-this.data.size/2*1.4+" 0 0")},remove:function(){},tick:function(t){if("undefined"==typeof this.last_time||t-this.last_time>250){if(this.video_el.readyState>0){var e=Math.floor(this.video_el.currentTime/60),i=Math.floor(this.video_el.currentTime%60);e=e<10?"0"+e:e,i=i<10?"0"+i:i;var a=Math.floor(this.video_el.duration/60),s=Math.floor(this.video_el.duration%60);a=a<10?"0"+a:a,s=s<10?"0"+s:s;var r=e+":"+i+" / "+a+":"+s,o=this.bar_canvas.width/this.video_el.duration;if(this.video_el.buffered.length>0){this.current_step=Math.round(this.video_el.currentTime/this.video_el.duration*this.bar_steps);var n=this.context;if(n.fillStyle=this.data.backgroundColor,n.fillRect(0,0,this.bar_canvas.width,this.bar_canvas.height),n.font=this.data.timeTextFont,n.fillStyle="white",n.textAlign="center",n.fillText(r,this.bar_canvas.width/2,.65*this.bar_canvas.height),this.video_el.seeking)n.font=this.data.statusTextFont,n.fillStyle=this.data.textColor,n.textAlign="end",n.fillText("Seeking",.95*this.bar_canvas.width,.6*this.bar_canvas.height);else{var l=this.video_el.buffered.end(this.video_el.buffered.length-1)/this.video_el.duration*100;n.font=this.data.statusTextFont,n.fillStyle=this.data.textColor,n.textAlign="end",n.fillText(l.toFixed(0)+"% loaded",.95*this.bar_canvas.width,.6*this.bar_canvas.height)}n.fillStyle=this.data.textColor,n.font=this.data.infoTextFont,n.textAlign="center",n.fillText(this.data.infoTextTop,this.bar_canvas.width/2,.8*this.bar_canvas.height),n.fillText(this.data.infoTextBottom,this.bar_canvas.width/2,.95*this.bar_canvas.height);for(var c=0;c<this.video_el.buffered.length;c++){var d=this.video_el.buffered.start(c)*o,h=this.video_el.buffered.end(c)*o,_=h-d;n.fillStyle="grey",n.fillRect(d,0,_,this.bar_canvas.height/3)}n.fillStyle=this.data.barColor,n.fillRect(0,0,this.video_el.currentTime/this.video_el.duration*this.bar_canvas.width,this.bar_canvas.height/3)}this.bar.object3D.children.length>0&&(null===this.bar.object3D.children[0].material.map&&(this.bar.object3D.children[0].material=new THREE.MeshBasicMaterial,this.bar.object3D.children[0].material.map=this.texture),this.texture.needsUpdate=!0)}this.last_time=t}},pause:function(){},play:function(){}})}]);
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+!function(t){function e(a){if(i[a])return i[a].exports;var s=i[a]={exports:{},id:a,loaded:!1};return t[a].call(s.exports,s,s.exports,e),s.loaded=!0,s.exports}var i={};return e.m=t,e.c=i,e.p="",e(0)}([function(t,e){if("undefined"==typeof AFRAME)throw new Error("Component attempted to register before AFRAME was available.");var i="Double-click outside player to hide or show it.",a="Look+click on play or bar. Space bar and arrows also work.";AFRAME.registerComponent("video-controls",{schema:{src:{type:"string"},size:{type:"number",default:1},distance:{type:"number",default:2},backgroundColor:{default:"black"},barColor:{default:"red"},textColor:{default:"yellow"},infoTextBottom:{default:void 0},infoTextTop:{default:void 0},infoTextFont:{default:"35px Helvetica Neue"},statusTextFont:{default:"30px Helvetica Neue"},timeTextFont:{default:"70px Helvetica Neue"},showLoadingPercentageWhenLoaded:{default:!0},position:{default:void 0}},position_time_from_steps:function(){var t=this.current_step/this.bar_steps;this.video_el.readyState>0&&(this.video_el.currentTime=t*this.video_el.duration)},position_control_from_camera:function(){var t=this,e=t.el.sceneEl.camera;if(e){var i=e.el.getAttribute("rotation"),a=i.y;t.y_position=e.position.y+1.6,t.x_position=-t.data.distance*Math.sin(a*Math.PI/180),t.z_position=-t.data.distance*Math.cos(a*Math.PI/180),t.el.setAttribute("position",[t.x_position,t.y_position,t.z_position].join(" ")),this.el.object3D.lookAt(new THREE.Vector3(e.position.x,e.position.y+1.6,e.position.z))}},init:function(){void 0===this.data.infoTextBottom&&(this.data.infoTextBottom=i),void 0===this.data.infoTextTop&&(this.data.infoTextTop=a);var t=this;this.bar_steps=10,this.current_step=0,this.el.setAttribute("visible",!0),this.video_selector=this.data.src,this.video_el=document.querySelector(this.video_selector),t.play_image_src=document.getElementById("video-play-image")?"#video-play-image":"https://res.cloudinary.com/dxbh0pppv/image/upload/c_scale,h_512,q_10/v1471016296/play_wvmogo.png",t.pause_image_src=document.getElementById("video-pause-image")?"#video-pause-image":"https://res.cloudinary.com/dxbh0pppv/image/upload/c_scale,h_512,q_25/v1471016296/pause_ndega5.png",this.play_image=document.createElement("a-image"),this.video_el.paused?this.play_image.setAttribute("src",t.play_image_src):this.play_image.setAttribute("src",t.pause_image_src),this.video_el.addEventListener("ended",function(){t.play_image.setAttribute("src",t.play_image_src)}),this.video_el.addEventListener("pause",function(){t.play_image.setAttribute("src",t.play_image_src)}),this.video_el.addEventListener("playing",function(){t.play_image.setAttribute("src",t.pause_image_src)}),this.bar_canvas=document.createElement("canvas"),this.bar_canvas.setAttribute("id","video_player_canvas"),this.bar_canvas.width=1024,this.bar_canvas.height=256,this.bar_canvas.style.display="none",this.context=this.bar_canvas.getContext("2d"),this.texture=new THREE.Texture(this.bar_canvas),this.play_image.addEventListener(this.el.getAttribute("play-pause-event")||"click",function(e){t.video_el.paused?(this.setAttribute("src",t.pause_image_src),t.video_el.play()):(this.setAttribute("src",t.play_image_src),t.video_el.pause()),e.stopPropagation(),e.preventDefault()}),window.addEventListener("keyup",function(e){switch(e.keyCode){case 32:t.play_image.dispatchEvent(new Event("click"));break;case 37:t.current_step=0,t.position_time_from_steps();break;case 39:t.current_step=t.bar_steps,t.position_time_from_steps();break;case 38:t.current_step=t.current_step<t.bar_steps?t.current_step+1:t.current_step,t.position_time_from_steps();break;case 40:t.current_step=t.current_step>0?t.current_step-1:t.current_step,t.position_time_from_steps()}},!1),this.bar=document.createElement("a-plane"),this.bar.setAttribute("color","#000"),this.bar.addEventListener("click",function(e){var i=document.querySelector("a-cursor").components.raycaster.raycaster.intersectObject(this.object3D,!0)[0].point,a=this.object3D.worldToLocal(i).x,s=a/t.data.size+.5;t.current_step=Math.round(s*t.bar_steps),t.video_el.readyState>0&&(t.video_el.currentTime=s*t.video_el.duration),e.stopPropagation(),e.preventDefault()}),this.el.appendChild(this.bar_canvas),this.el.appendChild(this.play_image),this.el.appendChild(this.bar),this.el.sceneEl.addEventListener("loaded",function(){var e=t.el.getAttribute("position");e.x||e.y||e.z||t.position_control_from_camera(),this.addEventListener("dblclick",function(){var e=document.querySelector("a-cursor").components.raycaster.raycaster;0==e.intersectObject(t.el.object3D,!0).length&&(t.el.getAttribute("visible")?t.el.setAttribute("visible",!1):(t.el.setAttribute("visible",!0),t.position_control_from_camera()))})})},update:function(t){this.position_control_from_camera(),this.bar.setAttribute("height",this.data.size/4),this.bar.setAttribute("width",this.data.size),this.bar.setAttribute("position","0.0 0.0 0"),this.play_image.setAttribute("height",this.data.size/4),this.play_image.setAttribute("width",this.data.size/4),this.play_image.setAttribute("position",-this.data.size/2*1.4+" 0 0")},remove:function(){},tick:function(t){if("undefined"==typeof this.last_time||t-this.last_time>250){if(this.video_el.readyState>0){var e=Math.floor(this.video_el.currentTime/60),i=Math.floor(this.video_el.currentTime%60);e=e<10?"0"+e:e,i=i<10?"0"+i:i;var a=Math.floor(this.video_el.duration/60),s=Math.floor(this.video_el.duration%60);a=a<10?"0"+a:a,s=s<10?"0"+s:s;var o=e+":"+i+" / "+a+":"+s,r=this.bar_canvas.width/this.video_el.duration;if(this.video_el.buffered.length>0){this.current_step=Math.round(this.video_el.currentTime/this.video_el.duration*this.bar_steps);var n=this.context;if(n.fillStyle=this.data.backgroundColor,n.fillRect(0,0,this.bar_canvas.width,this.bar_canvas.height),n.font=this.data.timeTextFont,n.fillStyle="white",n.textAlign="center",n.fillText(o,this.bar_canvas.width/2,.65*this.bar_canvas.height),this.video_el.seeking)n.font=this.data.statusTextFont,n.fillStyle=this.data.textColor,n.textAlign="end",n.fillText("Seeking",.95*this.bar_canvas.width,.6*this.bar_canvas.height);else{var l=this.video_el.buffered.end(this.video_el.buffered.length-1)/this.video_el.duration*100;n.font=this.data.statusTextFont,n.fillStyle=this.data.textColor,n.textAlign="end",(this.data.showLoadingPercentageWhenLoaded||l<100)&&n.fillText(l.toFixed(0)+"% loaded",.95*this.bar_canvas.width,.6*this.bar_canvas.height)}n.fillStyle=this.data.textColor,n.font=this.data.infoTextFont,n.textAlign="center","null"!==this.data.infoTextTop&&n.fillText(this.data.infoTextTop,this.bar_canvas.width/2,.8*this.bar_canvas.height),"null"!==this.data.infoTextBottom&&n.fillText(this.data.infoTextBottom,this.bar_canvas.width/2,.95*this.bar_canvas.height);for(var d=0;d<this.video_el.buffered.length;d++){var h=this.video_el.buffered.start(d)*r,c=this.video_el.buffered.end(d)*r,_=c-h;n.fillStyle="grey",n.fillRect(h,0,_,this.bar_canvas.height/3)}n.fillStyle=this.data.barColor,n.fillRect(0,0,this.video_el.currentTime/this.video_el.duration*this.bar_canvas.width,this.bar_canvas.height/3)}this.bar.object3D.children.length>0&&(null===this.bar.object3D.children[0].material.map&&(this.bar.object3D.children[0].material=new THREE.MeshBasicMaterial,this.bar.object3D.children[0].material.map=this.texture),this.texture.needsUpdate=!0)}this.last_time=t}},pause:function(){},play:function(){}})}]);
 },{}],2:[function(require,module,exports){
 require('aframe');
 require('../index.js');
 
 },{"../index.js":1,"aframe":3}],3:[function(require,module,exports){
-(function (global){
+(function (global,setImmediate){(function (){
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.AFRAME = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 'use strict';
 // For more information about browser field, check out the browser field at https://github.com/substack/browserify-handbook#browser-field.
@@ -67680,5 +67680,270 @@ module.exports = getWakeLock();
 });
 
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
+},{"timers":4}],4:[function(require,module,exports){
+(function (setImmediate,clearImmediate){(function (){
+var nextTick = require('process/browser.js').nextTick;
+var apply = Function.prototype.apply;
+var slice = Array.prototype.slice;
+var immediateIds = {};
+var nextImmediateId = 0;
+
+// DOM APIs, for completeness
+
+exports.setTimeout = function() {
+  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
+};
+exports.setInterval = function() {
+  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
+};
+exports.clearTimeout =
+exports.clearInterval = function(timeout) { timeout.close(); };
+
+function Timeout(id, clearFn) {
+  this._id = id;
+  this._clearFn = clearFn;
+}
+Timeout.prototype.unref = Timeout.prototype.ref = function() {};
+Timeout.prototype.close = function() {
+  this._clearFn.call(window, this._id);
+};
+
+// Does not start the time, just sets up the members needed.
+exports.enroll = function(item, msecs) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = msecs;
+};
+
+exports.unenroll = function(item) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = -1;
+};
+
+exports._unrefActive = exports.active = function(item) {
+  clearTimeout(item._idleTimeoutId);
+
+  var msecs = item._idleTimeout;
+  if (msecs >= 0) {
+    item._idleTimeoutId = setTimeout(function onTimeout() {
+      if (item._onTimeout)
+        item._onTimeout();
+    }, msecs);
+  }
+};
+
+// That's not how node.js implements it but the exposed api is the same.
+exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
+  var id = nextImmediateId++;
+  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
+
+  immediateIds[id] = true;
+
+  nextTick(function onNextTick() {
+    if (immediateIds[id]) {
+      // fn.call() is faster so we optimize for the common use-case
+      // @see http://jsperf.com/call-apply-segu
+      if (args) {
+        fn.apply(null, args);
+      } else {
+        fn.call(null);
+      }
+      // Prevent ids from leaking
+      exports.clearImmediate(id);
+    }
+  });
+
+  return id;
+};
+
+exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
+  delete immediateIds[id];
+};
+}).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
+},{"process/browser.js":5,"timers":4}],5:[function(require,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
 },{}]},{},[2]);
